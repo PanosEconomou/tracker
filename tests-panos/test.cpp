@@ -6,9 +6,9 @@ using namespace cv;
 #include <iostream>
 using namespace std;
 
-void main(){
+int main(){
 
     string path = "";
 
-    return;
+    return 0;
 }
