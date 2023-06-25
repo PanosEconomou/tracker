@@ -22,10 +22,10 @@ class HueMenu {
 
     public:
         HueMenu();
-        HueMenu(Mat frame);
+        HueMenu(Mat* frame);
         HueMenu(string windowName);
-        HueMenu(string windowName, Mat frame);
-        HueMenu(string windowName, Mat frame, int hueLow, int hueHigh, int satLow, int satHigh, int valLow, int valHigh);
+        HueMenu(string windowName, Mat* frame);
+        HueMenu(string windowName, Mat* frame, int hueLow, int hueHigh, int satLow, int satHigh, int valLow, int valHigh);
         ~HueMenu();
 
         int     getHueLow()          {return hueLow;}
@@ -36,7 +36,7 @@ class HueMenu {
         int     getValHigh()         {return valHigh;}
         Scalar  getLowScalar()       {return Scalar(hueLow,  satLow,  valLow);}
         Scalar  getHighScalar()      {return Scalar(hueHigh, satHigh, valHigh);}
-        Mat     getFrame()           {return frame;}
+        Mat*    getFrame()           {return frame;}
 
         void    setHueLow(int low)   {hueLow  = low;}
         void    setHueHigh(int high) {hueHigh = high;}
@@ -44,7 +44,7 @@ class HueMenu {
         void    setSatHigh(int high) {satHigh = high;}
         void    setValLow(int low)   {valLow  = low;}
         void    setValHigh(int high) {valHigh = high;}
-        void    setFrame(Mat frame)  {this->frame = frame;}
+        void    setFrame(Mat* frame) {this->frame = frame;}
 
         // Updates the frame using the corresponding HSV clipping
         static void onTrackbar(int value, void* params);
@@ -56,7 +56,7 @@ class HueMenu {
         int     satHigh;
         int     valLow;
         int     valHigh;
-        Mat     frame;
+        Mat*    frame;
         string  windowName;
 };
 

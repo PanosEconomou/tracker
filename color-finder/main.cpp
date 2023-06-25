@@ -20,7 +20,7 @@ int main(){
     capture.read(img);
 
     // HUE AND SATURATION PARAMS
-    HueMenu* menu           = new HueMenu(img); // We pass the frame as a parameter
+    HueMenu* menu           = new HueMenu(&img); // We pass the frame as a parameter
     TrackbarData empty_data = {nullptr, menu};
     
 
@@ -28,12 +28,12 @@ int main(){
 
         // Read the next frame into img
         capture.read(img);
-        menu->setFrame(img);
+        menu->setFrame(&img);
 
         //Apply the Hue Corrections to the frame
         menu->onTrackbar(-1,&empty_data);
 
-        // Display the image
+        // // Display the image
         // imshow("Capture",img);
 
         // Wait a bit to not explode
