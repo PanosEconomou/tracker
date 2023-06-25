@@ -1,4 +1,3 @@
 .vscode/
-tests-panos/build/
-tests-mariam/build/
+*build/
 build/
