@@ -18,14 +18,26 @@ using namespace cv;
 #include <iostream>
 using namespace std;
 
+class HueMenu;
+
+// A struct to store the data passed on each trackbar call
+struct TrackbarData {
+    int* variable;
+    HueMenu* menu;
+};
+
 class HueMenu {
 
     public:
         HueMenu();
-        HueMenu(Mat* frame);
-        HueMenu(string windowName);
-        HueMenu(string windowName, Mat* frame);
-        HueMenu(string windowName, Mat* frame, int hueLow, int hueHigh, int satLow, int satHigh, int valLow, int valHigh);
+        HueMenu(VideoCapture* capture, 
+                string fwindowName  = "Hue Menu", 
+                int fhueLow         = 0, 
+                int fhueHigh        = 179, 
+                int fsatLow         = 0, 
+                int fsatHigh        = 255, 
+                int fvalLow         = 0, 
+                int fvalHigh        = 255);
         ~HueMenu();
 
         int     getHueLow()          {return hueLow;}
@@ -36,34 +48,32 @@ class HueMenu {
         int     getValHigh()         {return valHigh;}
         Scalar  getLowScalar()       {return Scalar(hueLow,  satLow,  valLow);}
         Scalar  getHighScalar()      {return Scalar(hueHigh, satHigh, valHigh);}
-        Mat*    getFrame()           {return frame;}
+        VideoCapture* getCapture()   {return capture;}
 
-        void    setHueLow(int low)   {hueLow  = low;}
+        void    setHueLow (int low)  {hueLow  = low;}
         void    setHueHigh(int high) {hueHigh = high;}
-        void    setSatLow(int low)   {satLow  = low;}
+        void    setSatLow (int low)  {satLow  = low;}
         void    setSatHigh(int high) {satHigh = high;}
-        void    setValLow(int low)   {valLow  = low;}
+        void    setValLow (int low)  {valLow  = low;}
         void    setValHigh(int high) {valHigh = high;}
-        void    setFrame(Mat* frame) {this->frame = frame;}
+        void    setCapture(VideoCapture* capture) {this->capture = capture;}
+
+        void    createTrackbars();
 
         // Updates the frame using the corresponding HSV clipping
         static void onTrackbar(int value, void* params);
 
     private:
-        int     hueLow;
-        int     hueHigh;
-        int     satLow;
-        int     satHigh;
-        int     valLow;
-        int     valHigh;
-        Mat*    frame;
-        string  windowName;
-};
+        int             hueLow;
+        int             hueHigh;
+        int             satLow;
+        int             satHigh;
+        int             valLow;
+        int             valHigh;
+        VideoCapture*   capture;
+        string          windowName;
 
-// A struct to store the data passed on each trackbar call
-struct TrackbarData {
-    int* variable;
-    HueMenu* menu;
+        void construct(string windowName, VideoCapture* capture, int hueLow, int hueHigh, int satLow, int satHigh, int valLow, int valHigh);
 };
 
 #endif

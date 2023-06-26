@@ -7,86 +7,85 @@
 
 #include "hueMenu.hpp"
 
-HueMenu::HueMenu(string windowName, Mat* frame, int hueLow, int hueHigh, int satLow, int satHigh, int valLow, int valHigh){
 
+HueMenu::HueMenu(){
+    construct("Hue Menu", nullptr,0,179,0,255,0,255);
+}
+
+HueMenu::HueMenu(VideoCapture* capture, string fwindowName, int fhueLow, int fhueHigh, int fsatLow, int fsatHigh, int fvalLow, int fvalHigh){
+    construct(fwindowName, capture, fhueLow, fhueHigh, fsatLow, fsatHigh, fvalLow, fvalHigh);
+}
+
+HueMenu::~HueMenu(){}
+
+void HueMenu::construct(string fwindowName, VideoCapture* fcapture, int fhueLow, int fhueHigh, int fsatLow, int fsatHigh, int fvalLow, int fvalHigh){
     // Set Class variables
-    this->windowName    = windowName;
-    this->hueLow        = hueLow;
-    this->hueHigh       = hueHigh;
-    this->satLow        = satLow;
-    this->satHigh       = satHigh;
-    this->valLow        = valLow;
-    this->valHigh       = valHigh;
-    this->frame         = frame;
+    windowName    = fwindowName;
+    hueLow        = fhueLow;
+    hueHigh       = fhueHigh;
+    satLow        = fsatLow;
+    satHigh       = fsatHigh;
+    valLow        = fvalLow;
+    valHigh       = fvalHigh;
+    capture       = fcapture;
+
+    //Create the menu
+    createTrackbars();
+}
+
+void HueMenu::createTrackbars(){
+    // Initialize the data for each trackbar
+    TrackbarData* trackbarData = new TrackbarData[6];
 
     // Start the window
     namedWindow(windowName,WINDOW_AUTOSIZE);
 
     // Add the sliders
-    TrackbarData hueLowData  = { &(this->hueLow),  this};
-    createTrackbar("Low  Hue   ", windowName, nullptr, 179, onTrackbar, &hueLowData);
+    trackbarData[0] = { &hueLow,  this};
+    createTrackbar("Low  Hue   ", windowName, nullptr, 179, &HueMenu::onTrackbar, &(trackbarData[0]));
     setTrackbarPos("Low  Hue   ", windowName, hueLow);
 
-    TrackbarData hueHighData = { &(this->hueHigh), this};
-    createTrackbar("High Hue   ", windowName, nullptr, 179, onTrackbar, &hueHighData);
+    trackbarData[1] = { &hueHigh, this};
+    createTrackbar("High Hue   ", windowName, nullptr, 179, &HueMenu::onTrackbar, &(trackbarData[1]));
     setTrackbarPos("High Hue   ", windowName, hueHigh);
 
-    TrackbarData satLowData  = { &(this->satLow),  this};
-    createTrackbar("Low  Sat   ", windowName, nullptr, 255, onTrackbar, &satLowData);
+    trackbarData[2] = { &(this->satLow),  this};
+    createTrackbar("Low  Sat   ", windowName, nullptr, 255, &HueMenu::onTrackbar, &(trackbarData[2]));
     setTrackbarPos("Low  Sat   ", windowName, satLow);
 
-    TrackbarData satHighData = { &(this->satHigh), this};
-    createTrackbar("High Sat   ", windowName, nullptr, 255, onTrackbar, &satHighData);
+    trackbarData[3] = { &satHigh, this};
+    createTrackbar("High Sat   ", windowName, nullptr, 255, &HueMenu::onTrackbar, &(trackbarData[3]));
     setTrackbarPos("High Sat   ", windowName, satHigh);
 
-    TrackbarData valLowData  = { &(this->valLow),  this};
-    createTrackbar("Low  Value ", windowName, nullptr, 255, onTrackbar, &valLowData);
+    trackbarData[4] = { &valLow,  this};
+    createTrackbar("Low  Value ", windowName, nullptr, 255, &HueMenu::onTrackbar, &(trackbarData[4]));
     setTrackbarPos("Low  Value ", windowName, valLow);
 
-    TrackbarData valHighData = { &(this->valHigh), this};
-    createTrackbar("High Value ", windowName, nullptr, 255, onTrackbar, &valHighData);
+    trackbarData[5] = { &valHigh, this};
+    createTrackbar("High Value ", windowName, nullptr, 255, &HueMenu::onTrackbar, &(trackbarData[5]));
     setTrackbarPos("High Value ", windowName, valHigh);
 }
-
-HueMenu::HueMenu(){
-    HueMenu("Hue Selection Menu");
-}
-
-HueMenu::HueMenu(Mat* frame){
-    HueMenu("Hue Selection Menu", frame);
-}
-
-HueMenu::HueMenu(string windowName){
-    HueMenu(windowName, nullptr);
-}
-
-HueMenu::HueMenu(string windowName, Mat* frame){
-    HueMenu(windowName, frame, 0, 179, 0, 255, 0, 255);
-}
-
-HueMenu::~HueMenu() = default;
 
 // Callback function for the trackbar Edits the frame
 void HueMenu::onTrackbar(int value, void* params){
     // Extract the data from the stupid void* pointer
     TrackbarData* data = static_cast<TrackbarData*>(params);
 
-    // Skip if you got no picture
-    // std::cout << data->menu->getFrame() << endl;
-
     // Save the value to the designated variable
     if (data->variable != nullptr) *(data->variable) = value;
 
+    // Get the frame
+    Mat img;
+    data->menu->getCapture()->read(img);
+
     // Clip the frame according to the HSV parameters set so far
     Mat imgHSV, mask, adjusted;
-    if (!data->menu->getFrame()->empty()){
-        cvtColor(*(data->menu->getFrame()),imgHSV,COLOR_BGR2HSV);                           // Convert Color to HSV
+    if (!img.empty()){
+        cvtColor(img,imgHSV,COLOR_BGR2HSV);                                                 // Convert Color to HSV
         inRange(imgHSV,data->menu->getLowScalar(),data->menu->getHighScalar(),mask);        // Create a Clipping Mask
-        imgHSV.setTo(Scalar(0,0,0),mask);
-        cvtColor(imgHSV,adjusted,COLOR_HSV2BGR);
+        img.copyTo(adjusted,mask);                                                          // Apply the mask
     
         // Display the image
         imshow("Capture",adjusted);
-        waitKey(1);
     }
 }
