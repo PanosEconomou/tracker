@@ -75,16 +75,31 @@ void HueMenu::onTrackbar(int value, void* params){
     if (data->variable != nullptr) *(data->variable) = value;
 
     // Get the frame
-    Mat img;
+    Mat img, hsv, blur, mask, adjusted;
+    vector<vector<Point>> contours;
     data->menu->getCapture()->read(img);
 
     // Clip the frame according to the HSV parameters set so far
-    Mat imgHSV, mask, adjusted;
     if (!img.empty()){
-        cvtColor(img,imgHSV,COLOR_BGR2HSV);                                                 // Convert Color to HSV
-        inRange(imgHSV,data->menu->getLowScalar(),data->menu->getHighScalar(),mask);        // Create a Clipping Mask
+        cvtColor(img,hsv,COLOR_BGR2HSV);                                                 // Convert Color to HSV
+        GaussianBlur(hsv, blur, Size(13,13), 7, 7);
+        inRange(blur,data->menu->getLowScalar(),data->menu->getHighScalar(),mask);        // Create a Clipping Mask
         img.copyTo(adjusted,mask);                                                          // Apply the mask
-    
+        findContours(mask,contours,RETR_EXTERNAL,CHAIN_APPROX_SIMPLE);
+
+        for (const auto& contour : contours) {
+            Rect boundingBox = boundingRect(contour);
+
+            // Access bounding box coordinates
+            int x = boundingBox.x;
+            int y = boundingBox.y;
+            int width = boundingBox.width;
+            int height = boundingBox.height;
+
+            // Draw the bounding box on the original image (optional)
+            rectangle(adjusted, boundingBox, cv::Scalar(0, 255, 0), 2);
+        }
+
         // Display the image
         imshow("Capture",adjusted);
     }

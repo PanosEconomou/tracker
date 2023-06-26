@@ -11,7 +11,7 @@ using namespace std;
 int main(){
 
     // Start a video capture on the camera
-    VideoCapture capture(0);
+    VideoCapture capture(1);
 
     // Image objects to hold the frames
     Mat img;
